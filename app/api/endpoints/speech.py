@@ -213,12 +213,16 @@ async def generate_speech_internal(
         exaggeration = exaggeration if exaggeration is not None else Config.EXAGGERATION
         cfg_weight = cfg_weight if cfg_weight is not None else Config.CFG_WEIGHT
         temperature = temperature if temperature is not None else Config.TEMPERATURE
-        num_words = 0
+
+# Calculate num_words ALWAYS (not just when num_steps is None)
+        num_words = len(text.split())
+
+# Auto-calculate num_steps if not provided
         if num_steps is None:
-            # Estimer : environ 8-10 steps par mot
-            num_words = len(text.split())
             num_steps = max(500, min(num_words * 10, 3000))
             print(f"📏 Auto-calculated num_steps: {num_steps} for {num_words} words")
+        else:
+            print(f"📏 Using provided num_steps: {num_steps} for {num_words} words")
     
         # Split text into chunks
         update_tts_status(request_id, TTSStatus.CHUNKING, "Splitting text into chunks")
