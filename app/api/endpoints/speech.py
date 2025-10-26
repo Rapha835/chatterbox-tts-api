@@ -213,7 +213,7 @@ async def generate_speech_internal(
         exaggeration = exaggeration if exaggeration is not None else Config.EXAGGERATION
         cfg_weight = cfg_weight if cfg_weight is not None else Config.CFG_WEIGHT
         temperature = temperature if temperature is not None else Config.TEMPERATURE
-
+        num_words = 0
         if num_steps is None:
             # Estimer : environ 8-10 steps par mot
             num_words = len(text.split())
