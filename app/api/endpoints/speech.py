@@ -148,7 +148,7 @@ async def generate_speech_internal(
     exaggeration: Optional[float] = None,
     cfg_weight: Optional[float] = None,
     temperature: Optional[float] = None,
-    num_steps: Optional[int] = 2000
+    num_steps: Optional[int] = 1200
 ) -> io.BytesIO:
     """Internal function to generate speech with given parameters"""
     global REQUEST_COUNTER
@@ -213,7 +213,13 @@ async def generate_speech_internal(
         exaggeration = exaggeration if exaggeration is not None else Config.EXAGGERATION
         cfg_weight = cfg_weight if cfg_weight is not None else Config.CFG_WEIGHT
         temperature = temperature if temperature is not None else Config.TEMPERATURE
-        
+
+        if num_steps is None:
+            # Estimer : environ 8-10 steps par mot
+            num_words = len(text.split())
+            num_steps = max(500, min(num_words * 10, 3000))
+            print(f"📏 Auto-calculated num_steps: {num_steps} for {num_words} words")
+    
         # Split text into chunks
         update_tts_status(request_id, TTSStatus.CHUNKING, "Splitting text into chunks")
         chunks = split_text_into_chunks(text, Config.MAX_CHUNK_LENGTH)
@@ -865,7 +871,7 @@ async def text_to_speech_with_upload(
     streaming_chunk_size: Optional[int] = Form(None, description="Characters per streaming chunk (50-500)", ge=50, le=500),
     streaming_strategy: Optional[str] = Form(None, description="Chunking strategy (sentence, paragraph, fixed, word)"),
     streaming_quality: Optional[str] = Form(None, description="Quality preset (fast, balanced, high)"),
-    num_steps: Optional[int] = Form(2000, description="Number of generation steps (500-5000)", ge=500, le=5000),
+    num_steps: Optional[int] = Form(1200, description="Number of generation steps (500-5000)", ge=500, le=5000),
     voice_file: Optional[UploadFile] = File(None, description="Optional voice sample file for custom voice cloning")
 ):
     """Generate speech from text using Chatterbox TTS with optional voice file upload"""
